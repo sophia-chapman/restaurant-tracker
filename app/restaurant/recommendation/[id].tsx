@@ -1,0 +1,160 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, Stack, router, useFocusEffect } from 'expo-router';
+import { useRecommendations } from '../../../src/hooks/useRecommendations';
+import { Ionicons } from '@expo/vector-icons';
+
+export default function RecommendationDetailScreen() {
+  const { id } = useLocalSearchParams();
+  const { recommendations, loading, error, refresh } = useRecommendations();
+  const [recommendation, setRecommendation] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (recommendations) {
+      const foundRecommendation = recommendations.find(r => r.id === id);
+      setRecommendation(foundRecommendation || null);
+    }
+  }, [recommendations, id]);
+
+  // Refresh data when the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
+
+  const handleEdit = () => {
+    router.push(`/restaurant/recommendation/${id}/edit`);
+  };
+
+  // Only show loading indicator if we don't have any recommendations yet
+  if (loading && recommendations.length === 0) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  if (error || !recommendation) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.error}>{error || 'Recommendation not found'}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          title: recommendation.name,
+          headerBackTitle: 'Back',
+          headerRight: () => (
+            <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
+              <Ionicons name="pencil" size={24} color="#007AFF" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <ScrollView style={styles.container}>
+        <View style={styles.section}>
+          <Text style={styles.label}>Cuisine Type</Text>
+          <Text style={styles.value}>{recommendation.cuisineType}</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>Location</Text>
+          <View style={styles.tagsContainer}>
+            {recommendation.location.map((tag: string, index: number) => (
+              <View key={index} style={[styles.tag, styles.locationTag]}>
+                <Text style={styles.tagText}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>Recommended By</Text>
+          <Text style={styles.value}>{recommendation.recommendedBy}</Text>
+        </View>
+
+        {recommendation.notes && (
+          <View style={styles.section}>
+            <Text style={styles.label}>Notes</Text>
+            <Text style={styles.value}>{recommendation.notes}</Text>
+          </View>
+        )}
+
+        <View style={styles.section}>
+          <Text style={styles.label}>Added On</Text>
+          <Text style={styles.value}>
+            {new Date(recommendation.createdAt).toLocaleDateString()}
+          </Text>
+        </View>
+      </ScrollView>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  error: {
+    color: 'red',
+    fontSize: 16,
+  },
+  section: {
+    marginBottom: 24,
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  label: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  value: {
+    fontSize: 16,
+    color: '#333',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tag: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  locationTag: {
+    backgroundColor: '#e0e0e0',
+  },
+  tagText: {
+    color: '#666',
+    fontSize: 14,
+  },
+  editButton: {
+    marginRight: 16,
+  },
+}); 

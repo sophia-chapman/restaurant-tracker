@@ -5,7 +5,9 @@ import dotenv from 'dotenv';
 import restaurantRoutes from './routes/restaurants';
 import locationTagsRouter from './routes/locationTags';
 import vibeTagsRouter from './routes/vibeTags';
+import recommendationsRouter from './routes/recommendations';
 import { Restaurant } from './models/Restaurant';
+import { Recommendation } from './models/Recommendation';
 
 dotenv.config();
 
@@ -51,6 +53,7 @@ mongoose.connect(MONGODB_URI, {
   app.use('/api/restaurants', restaurantRoutes);
   app.use('/api/location-tags', locationTagsRouter);
   app.use('/api/vibe-tags', vibeTagsRouter);
+  app.use('/api/recommendations', recommendationsRouter);
   
   // Start server
   app.listen(PORT, () => {

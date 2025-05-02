@@ -1,27 +1,23 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { RestaurantForm } from '../../src/components/RestaurantForm';
-import { useRestaurants } from '../../src/hooks/useRestaurants';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { router } from 'expo-router';
-import { Restaurant } from '../../src/types/restaurant';
 
-export default function AddRestaurantScreen() {
-  const { addRestaurant, refresh } = useRestaurants();
-
-  const handleSubmit = async (restaurant: Omit<Restaurant, 'id'>) => {
-    try {
-      await addRestaurant(restaurant);
-      await refresh(); // Refresh the list before navigating back
-      router.back();
-    } catch (error) {
-      console.error('Error adding restaurant:', error);
-      // Handle error appropriately
-    }
-  };
-
+export default function AddScreen() {
   return (
     <View style={styles.container}>
-      <RestaurantForm onSubmit={handleSubmit} />
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/restaurant/add')}
+      >
+        <Text style={styles.buttonText}>Review Restaurant</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/restaurant/add-recommendation')}
+      >
+        <Text style={styles.buttonText}>Add Recommendation</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -30,5 +26,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    padding: 16,
+    justifyContent: 'center',
+    gap: 16,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 }); 

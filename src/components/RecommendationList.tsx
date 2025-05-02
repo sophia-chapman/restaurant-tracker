@@ -1,40 +1,37 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Restaurant } from '../types/restaurant';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 
-interface RestaurantListProps {
-  onPress?: (restaurant: Restaurant) => void;
-  restaurants: Restaurant[];
+interface Recommendation {
+  id: string;
+  name: string;
+  location: string[];
+  cuisineType: string;
+  recommendedBy: string;
+  notes: string;
+  createdAt: string;
+}
+
+interface RecommendationListProps {
+  onPress?: (recommendation: Recommendation) => void;
+  recommendations: Recommendation[];
   loading?: boolean;
   error?: string | null;
 }
 
-export default function RestaurantList({ onPress, restaurants, loading, error }: RestaurantListProps) {
-  const sortedRestaurants = useMemo(() => {
-    return [...restaurants].sort((a, b) => {
-      // Sort by favorite status first
-      if (a.favorite && !b.favorite) return -1;
-      if (!a.favorite && b.favorite) return 1;
-      // If both have same favorite status, sort by name
-      return a.name.localeCompare(b.name);
-    });
-  }, [restaurants]);
+export default function RecommendationList({ onPress, recommendations, loading, error }: RecommendationListProps) {
+  const sortedRecommendations = useMemo(() => {
+    return [...recommendations].sort((a, b) => a.name.localeCompare(b.name));
+  }, [recommendations]);
 
-  const renderItem = ({ item }: { item: Restaurant }) => (
+  const renderItem = ({ item }: { item: Recommendation }) => (
     <TouchableOpacity
-      style={styles.restaurantItem}
-      onPress={() => onPress ? onPress(item) : router.push(`/restaurant/${item.id}`)}
+      style={styles.recommendationItem}
+      onPress={() => onPress ? onPress(item) : router.push(`/restaurant/recommendation/${item.id}`)}
     >
-      {item.favorite && (
-        <View style={styles.favoriteStar}>
-          <Ionicons name="star" size={24} color="#FFD700" />
-        </View>
-      )}
-      <Text style={styles.restaurantName}>{item.name}</Text>
-      <Text style={styles.restaurantDetails}>
-        {item.cuisineType} {item.rating}
+      <Text style={styles.recommendationName}>{item.name}</Text>
+      <Text style={styles.recommendationDetails}>
+        {item.cuisineType} 
       </Text>
       <View style={styles.tagsContainer}>
         {item.location.map((tag, index) => (
@@ -42,12 +39,12 @@ export default function RestaurantList({ onPress, restaurants, loading, error }:
             <Text style={styles.tagText}>{tag}</Text>
           </View>
         ))}
-        {item.vibeTags.map((tag, index) => (
-          <View key={index} style={[styles.tag, styles.vibeTag]}>
-            <Text style={styles.tagText}>{tag}</Text>
-          </View>
-        ))}
       </View>
+      {item.notes && (
+        <Text style={styles.notes} numberOfLines={2}>
+          {item.notes}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 
@@ -70,9 +67,9 @@ export default function RestaurantList({ onPress, restaurants, loading, error }:
   return (
     <View style={styles.container}>
       <FlatList
-        data={sortedRestaurants}
+        data={sortedRecommendations}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id || item._id || ''}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
       />
     </View>
@@ -95,7 +92,7 @@ const styles = StyleSheet.create({
   list: {
     padding: 16,
   },
-  restaurantItem: {
+  recommendationItem: {
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 8,
@@ -109,19 +106,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  favoriteStar: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 1,
-  },
-  restaurantName: {
+  recommendationName: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
-    paddingRight: 32,
   },
-  restaurantDetails: {
+  recommendationDetails: {
     fontSize: 14,
     color: '#666',
     marginBottom: 8,
@@ -130,6 +120,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginBottom: 8,
   },
   tag: {
     paddingHorizontal: 12,
@@ -139,11 +130,13 @@ const styles = StyleSheet.create({
   locationTag: {
     backgroundColor: '#e0e0e0',
   },
-  vibeTag: {
-    backgroundColor: '#E3F2FD',
-  },
   tagText: {
     color: '#666',
     fontSize: 14,
+  },
+  notes: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
   },
 }); 

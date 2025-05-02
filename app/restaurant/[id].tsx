@@ -4,6 +4,7 @@ import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Restaurant } from '../../src/types/restaurant';
 import { useRestaurants } from '../../src/hooks/useRestaurants';
 import { RestaurantForm } from '../../src/components/RestaurantForm';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RestaurantDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -58,9 +59,7 @@ export default function RestaurantDetailScreen() {
               onPress={() => setIsEditing(!isEditing)}
               style={styles.editButton}
             >
-              <Text style={styles.editButtonText}>
-                {isEditing ? 'Cancel' : 'Edit'}
-              </Text>
+              <Ionicons name="pencil" size={24} color="#007AFF" />
             </TouchableOpacity>
           ),
         }}
@@ -211,9 +210,5 @@ const styles = StyleSheet.create({
   },
   editButton: {
     marginRight: 16,
-  },
-  editButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
   },
 }); 
