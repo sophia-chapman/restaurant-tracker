@@ -36,6 +36,39 @@ export function useRecommendations() {
     }
   };
 
+  const search = async (filters: { name?: string; location?: string; cuisineType?: string }) => {
+    try {
+      setLoading(true);
+      // If no filters are provided, clear the recommendations
+      if (!filters.name && !filters.location && !filters.cuisineType) {
+        setRecommendations([]);
+        setError(null);
+        return;
+      }
+
+      const queryParams = new URLSearchParams();
+      if (filters.name) queryParams.append('name', filters.name);
+      if (filters.location) queryParams.append('location', filters.location);
+      if (filters.cuisineType) queryParams.append('cuisineType', filters.cuisineType);
+
+      const response = await fetch(`http://localhost:3000/api/recommendations/search?${queryParams}`);
+      if (!response.ok) {
+        throw new Error('Failed to search recommendations');
+      }
+      const data = await response.json();
+      const transformedData = data.map((item: any) => ({
+        ...item,
+        id: item._id,
+      }));
+      setRecommendations(transformedData);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchRecommendations();
   }, []);
@@ -45,5 +78,6 @@ export function useRecommendations() {
     loading,
     error,
     refresh: fetchRecommendations,
+    search,
   };
 } 
