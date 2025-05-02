@@ -11,6 +11,7 @@ export interface Restaurant {
   order: string;
   description: string;
   visitedDate: string;
+  favorite: boolean;
 }
 
 export interface RestaurantFilters {

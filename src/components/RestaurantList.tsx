@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Restaurant } from '../types/restaurant';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 interface RestaurantListProps {
   onPress?: (restaurant: Restaurant) => void;
@@ -11,11 +12,26 @@ interface RestaurantListProps {
 }
 
 export default function RestaurantList({ onPress, restaurants, loading, error }: RestaurantListProps) {
+  const sortedRestaurants = useMemo(() => {
+    return [...restaurants].sort((a, b) => {
+      // Sort by favorite status first
+      if (a.favorite && !b.favorite) return -1;
+      if (!a.favorite && b.favorite) return 1;
+      // If both have same favorite status, sort by name
+      return a.name.localeCompare(b.name);
+    });
+  }, [restaurants]);
+
   const renderItem = ({ item }: { item: Restaurant }) => (
     <TouchableOpacity
       style={styles.restaurantItem}
       onPress={() => onPress ? onPress(item) : router.push(`/restaurant/${item.id}`)}
     >
+      {item.favorite && (
+        <View style={styles.favoriteStar}>
+          <Ionicons name="star" size={24} color="#FFD700" />
+        </View>
+      )}
       <Text style={styles.restaurantName}>{item.name}</Text>
       <Text style={styles.restaurantDetails}>
         {item.cuisineType} • {item.rating}
@@ -54,7 +70,7 @@ export default function RestaurantList({ onPress, restaurants, loading, error }:
   return (
     <View style={styles.container}>
       <FlatList
-        data={restaurants}
+        data={sortedRestaurants}
         renderItem={renderItem}
         keyExtractor={(item) => item.id || item._id || ''}
         contentContainerStyle={styles.list}
@@ -93,10 +109,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  favoriteStar: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 1,
+  },
   restaurantName: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
+    paddingRight: 32,
   },
   restaurantDetails: {
     fontSize: 14,

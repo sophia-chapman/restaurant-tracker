@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, Switch } from 'react-native';
 import { Restaurant, Rating } from '../types/restaurant';
 import { LocationTagSelector } from './LocationTagSelector';
 import { VibeTagSelector } from './VibeTagSelector';
@@ -17,6 +17,7 @@ export const RestaurantForm: React.FC<RestaurantFormProps> = ({ onSubmit, initia
   const [rating, setRating] = useState<Rating>(initialData?.rating || 'okay');
   const [order, setOrder] = useState(initialData?.order || '');
   const [description, setDescription] = useState(initialData?.description || '');
+  const [favorite, setFavorite] = useState(initialData?.favorite || false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -31,6 +32,7 @@ export const RestaurantForm: React.FC<RestaurantFormProps> = ({ onSubmit, initia
         order,
         description,
         visitedDate: new Date().toISOString(),
+        favorite,
       };
 
       onSubmit(restaurantData);
@@ -89,6 +91,15 @@ export const RestaurantForm: React.FC<RestaurantFormProps> = ({ onSubmit, initia
         multiline
         numberOfLines={4}
       />
+      <View style={styles.favoriteContainer}>
+        <Text style={styles.favoriteLabel}>Favorite</Text>
+        <Switch
+          value={favorite}
+          onValueChange={setFavorite}
+          trackColor={{ false: '#767577', true: '#81b0ff' }}
+          thumbColor={favorite ? '#007AFF' : '#f4f3f4'}
+        />
+      </View>
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit}
@@ -137,6 +148,17 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 16,
     color: '#000',
+  },
+  favoriteContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  favoriteLabel: {
+    fontSize: 16,
+    color: '#333',
   },
   submitButton: {
     backgroundColor: '#007AFF',

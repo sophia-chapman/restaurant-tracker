@@ -109,6 +109,11 @@ export default function RestaurantDetailScreen() {
           </View>
 
           <View style={styles.section}>
+            <Text style={styles.label}>Favorite</Text>
+            <Text style={styles.value}>{restaurant.favorite ? 'Yes' : 'No'}</Text>
+          </View>
+
+          <View style={styles.section}>
             <Text style={styles.label}>Order</Text>
             <Text style={styles.value}>{restaurant.order}</Text>
           </View>

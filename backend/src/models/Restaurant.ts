@@ -35,6 +35,11 @@ const restaurantSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  favorite: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
 }, {
   timestamps: true,
 });
