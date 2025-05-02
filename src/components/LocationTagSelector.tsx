@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, FlatList, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface LocationTagSelectorProps {
   selectedTags: string[];
@@ -14,6 +15,7 @@ export const LocationTagSelector: React.FC<LocationTagSelectorProps> = ({
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   useEffect(() => {
     loadTags();
@@ -41,6 +43,8 @@ export const LocationTagSelector: React.FC<LocationTagSelectorProps> = ({
     if (!selectedTags.includes(tag)) {
       onTagsChange([...selectedTags, tag]);
     }
+    setIsDropdownVisible(false);
+    setInputValue('');
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
@@ -72,6 +76,11 @@ export const LocationTagSelector: React.FC<LocationTagSelectorProps> = ({
     }
   };
 
+  const filteredTags = availableTags.filter(tag => 
+    !selectedTags.includes(tag) && 
+    tag.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.selectedTagsContainer}>
@@ -91,30 +100,42 @@ export const LocationTagSelector: React.FC<LocationTagSelectorProps> = ({
           style={styles.input}
           placeholder="Add location tag..."
           value={inputValue}
-          onChangeText={setInputValue}
+          onChangeText={(text) => {
+            setInputValue(text);
+            setIsDropdownVisible(true);
+          }}
+          onFocus={() => setIsDropdownVisible(true)}
           onSubmitEditing={handleInputSubmit}
         />
+        <TouchableOpacity 
+          style={styles.dropdownButton}
+          onPress={() => setIsDropdownVisible(!isDropdownVisible)}
+        >
+          <Ionicons 
+            name={isDropdownVisible ? "chevron-up" : "chevron-down"} 
+            size={24} 
+            color="#666" 
+          />
+        </TouchableOpacity>
       </View>
       {loading ? (
         <ActivityIndicator size="small" color="#007AFF" />
       ) : error ? (
         <Text style={styles.errorText}>{error}</Text>
-      ) : availableTags.length > 0 ? (
-        <View style={styles.availableTagsContainer}>
-          <Text style={styles.sectionTitle}>Available Tags:</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {availableTags
-              .filter(tag => !selectedTags.includes(tag))
-              .map((tag) => (
-                <TouchableOpacity
-                  key={tag}
-                  style={styles.availableTag}
-                  onPress={() => handleAddTag(tag)}
-                >
-                  <Text style={styles.availableTagText}>{tag}</Text>
-                </TouchableOpacity>
-              ))}
-          </ScrollView>
+      ) : isDropdownVisible && filteredTags.length > 0 ? (
+        <View style={styles.dropdownContainer}>
+          <FlatList
+            data={filteredTags}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => handleAddTag(item)}
+              >
+                <Text style={styles.dropdownItemText}>{item}</Text>
+              </TouchableOpacity>
+            )}
+          />
         </View>
       ) : null}
     </View>
@@ -151,33 +172,47 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
   },
   input: {
+    flex: 1,
     borderWidth: 1,
     borderColor: '#ddd',
     padding: 12,
+    paddingRight: 40,
     borderRadius: 8,
     fontSize: 16,
   },
-  availableTagsContainer: {
-    marginTop: 8,
+  dropdownButton: {
+    position: 'absolute',
+    right: 12,
+    padding: 4,
   },
-  sectionTitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+  dropdownContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    maxHeight: 200,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  availableTag: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-    marginRight: 8,
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  availableTagText: {
-    color: '#666',
-    fontSize: 14,
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#333',
   },
   errorText: {
     color: 'red',

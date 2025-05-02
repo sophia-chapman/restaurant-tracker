@@ -24,7 +24,12 @@ export default function RestaurantList({ onPress, restaurants, loading, error }:
 
   const renderItem = ({ item }: { item: Restaurant }) => (
     <TouchableOpacity
-      style={styles.restaurantItem}
+      style={[
+        styles.restaurantItem,
+        item.rating === 'good' ? styles.restaurantItemGood :
+        item.rating === 'okay' ? styles.restaurantItemOkay :
+        styles.restaurantItemBad
+      ]}
       onPress={() => onPress ? onPress(item) : router.push(`/restaurant/${item.id}`)}
     >
       {item.favorite && (
@@ -34,7 +39,7 @@ export default function RestaurantList({ onPress, restaurants, loading, error }:
       )}
       <Text style={styles.restaurantName}>{item.name}</Text>
       <Text style={styles.restaurantDetails}>
-        {item.cuisineType} {item.rating}
+        {item.cuisineType}
       </Text>
       <View style={styles.tagsContainer}>
         {item.location.map((tag, index) => (
@@ -108,6 +113,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 2,
+    borderColor: '#ddd',
+  },
+  restaurantItemGood: {
+    borderColor: '#4CAF50',
+  },
+  restaurantItemOkay: {
+    borderColor: '#FFC107',
+  },
+  restaurantItemBad: {
+    borderColor: '#F44336',
   },
   favoriteStar: {
     position: 'absolute',
