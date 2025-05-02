@@ -40,6 +40,11 @@ const restaurantSchema = new mongoose.Schema({
     required: true,
     default: false,
   },
+  deleted: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
 }, {
   timestamps: true,
 });

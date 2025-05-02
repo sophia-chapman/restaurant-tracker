@@ -68,6 +68,21 @@ export function useRecommendations() {
     }
   }, [fetchRecommendations]);
 
+  const deleteRecommendation = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/recommendations/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete recommendation');
+      }
+      setRecommendations((prev) => prev.filter((r) => r.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      throw err;
+    }
+  }, []);
+
   useEffect(() => {
     fetchRecommendations();
   }, [fetchRecommendations]);
@@ -78,5 +93,6 @@ export function useRecommendations() {
     error,
     refresh: fetchRecommendations,
     search,
+    deleteRecommendation,
   };
 } 

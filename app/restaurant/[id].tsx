@@ -5,12 +5,14 @@ import { Restaurant } from '../../src/types/restaurant';
 import { useRestaurants } from '../../src/hooks/useRestaurants';
 import { RestaurantForm } from '../../src/components/RestaurantForm';
 import { Ionicons } from '@expo/vector-icons';
+import { DeleteConfirmationModal } from '../../src/components/DeleteConfirmationModal';
 
 export default function RestaurantDetailScreen() {
   const { id } = useLocalSearchParams();
-  const { restaurants, loading, error, updateRestaurant } = useRestaurants();
+  const { restaurants, loading, error, updateRestaurant, deleteRestaurant } = useRestaurants();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (restaurants) {
@@ -29,6 +31,18 @@ export default function RestaurantDetailScreen() {
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating restaurant:', error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      if (!restaurant?.id && !restaurant?._id) return;
+      const restaurantId = restaurant.id || restaurant._id;
+      if (!restaurantId) return;
+      await deleteRestaurant(restaurantId);
+      router.back();
+    } catch (error) {
+      console.error('Error deleting restaurant:', error);
     }
   };
 
@@ -55,12 +69,20 @@ export default function RestaurantDetailScreen() {
           title: restaurant.name,
           headerBackTitle: 'Back',
           headerRight: () => (
-            <TouchableOpacity
-              onPress={() => setIsEditing(!isEditing)}
-              style={styles.editButton}
-            >
-              <Ionicons name="pencil" size={24} color="#007AFF" />
-            </TouchableOpacity>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity
+                onPress={() => setIsEditing(!isEditing)}
+                style={styles.headerButton}
+              >
+                <Ionicons name="pencil" size={24} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setShowDeleteModal(true)}
+                style={styles.headerButton}
+              >
+                <Ionicons name="trash" size={24} color="#ff3b30" />
+              </TouchableOpacity>
+            </View>
           ),
         }}
       />
@@ -130,6 +152,13 @@ export default function RestaurantDetailScreen() {
           </View>
         </ScrollView>
       )}
+
+      <DeleteConfirmationModal
+        visible={showDeleteModal}
+        name={restaurant.name}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </>
   );
 }
@@ -137,8 +166,7 @@ export default function RestaurantDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 16,
+    backgroundColor: '#fff',
   },
   center: {
     flex: 1,
@@ -150,43 +178,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   section: {
-    marginBottom: 24,
-    backgroundColor: 'white',
     padding: 16,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   label: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    marginBottom: 4,
   },
   value: {
     fontSize: 16,
-    color: '#333',
-  },
-  rating: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textTransform: 'capitalize',
-  },
-  ratinggood: {
-    color: '#4CAF50',
-  },
-  ratingokay: {
-    color: '#FFC107',
-  },
-  ratingbad: {
-    color: '#F44336',
+    color: '#000',
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -208,7 +211,24 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 14,
   },
-  editButton: {
-    marginRight: 16,
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  headerButton: {
+    padding: 8,
+  },
+  rating: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  ratinggood: {
+    color: '#4CAF50',
+  },
+  ratingokay: {
+    color: '#FFC107',
+  },
+  ratingbad: {
+    color: '#F44336',
   },
 }); 

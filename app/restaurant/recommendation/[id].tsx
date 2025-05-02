@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity
 import { useLocalSearchParams, Stack, router, useFocusEffect } from 'expo-router';
 import { useRecommendations } from '../../../src/hooks/useRecommendations';
 import { Ionicons } from '@expo/vector-icons';
+import { DeleteConfirmationModal } from '../../../src/components/DeleteConfirmationModal';
 
 export default function RecommendationDetailScreen() {
   const { id } = useLocalSearchParams();
-  const { recommendations, loading, error, refresh } = useRecommendations();
+  const { recommendations, loading, error, refresh, deleteRecommendation } = useRecommendations();
   const [recommendation, setRecommendation] = useState<any | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (recommendations) {
@@ -25,6 +27,15 @@ export default function RecommendationDetailScreen() {
 
   const handleEdit = () => {
     router.push(`/restaurant/recommendation/${id}/edit`);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteRecommendation(id as string);
+      router.back();
+    } catch (error) {
+      console.error('Error deleting recommendation:', error);
+    }
   };
 
   const handleReview = () => {
@@ -66,9 +77,17 @@ export default function RecommendationDetailScreen() {
           title: recommendation.name,
           headerBackTitle: 'Back',
           headerRight: () => (
-            <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
-              <Ionicons name="pencil" size={24} color="#007AFF" />
-            </TouchableOpacity>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity onPress={handleEdit} style={styles.headerButton}>
+                <Ionicons name="pencil" size={24} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setShowDeleteModal(true)}
+                style={styles.headerButton}
+              >
+                <Ionicons name="trash" size={24} color="#ff3b30" />
+              </TouchableOpacity>
+            </View>
           ),
         }}
       />
@@ -112,6 +131,13 @@ export default function RecommendationDetailScreen() {
           <Text style={styles.reviewButtonText}>Review this restaurant</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <DeleteConfirmationModal
+        visible={showDeleteModal}
+        name={recommendation.name}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </>
   );
 }
@@ -161,7 +187,11 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 14,
   },
-  editButton: {
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  headerButton: {
     padding: 8,
   },
   reviewButton: {
