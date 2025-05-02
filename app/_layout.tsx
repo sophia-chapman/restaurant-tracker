@@ -5,11 +5,17 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { LogBox } from 'react-native';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// Suppress VirtualizedList warning
+LogBox.ignoreLogs([
+  'Each child in a list should have a unique "key" prop',
+]);
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
