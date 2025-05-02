@@ -1,20 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Restaurant } from '../../src/types/restaurant';
 import { useRestaurants } from '../../src/hooks/useRestaurants';
+import { RestaurantForm } from '../../src/components/RestaurantForm';
 
 export default function RestaurantDetailScreen() {
   const { id } = useLocalSearchParams();
-  const { restaurants, loading, error } = useRestaurants();
+  const { restaurants, loading, error, updateRestaurant } = useRestaurants();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (restaurants) {
-      const foundRestaurant = restaurants.find(r => r.id === id);
+      const foundRestaurant = restaurants.find(r => r.id === id || r._id === id);
       setRestaurant(foundRestaurant || null);
     }
   }, [restaurants, id]);
+
+  const handleUpdate = async (updatedData: Omit<Restaurant, 'id'>) => {
+    try {
+      if (!restaurant?.id && !restaurant?._id) return;
+      const restaurantId = restaurant.id || restaurant._id;
+      if (!restaurantId) return;
+      const updatedRestaurant = await updateRestaurant(restaurantId, updatedData);
+      setRestaurant(updatedRestaurant);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating restaurant:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -38,60 +53,79 @@ export default function RestaurantDetailScreen() {
         options={{
           title: restaurant.name,
           headerBackTitle: 'Back',
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => setIsEditing(!isEditing)}
+              style={styles.editButton}
+            >
+              <Text style={styles.editButtonText}>
+                {isEditing ? 'Cancel' : 'Edit'}
+              </Text>
+            </TouchableOpacity>
+          ),
         }}
       />
-      <ScrollView style={styles.container}>
-        <View style={styles.section}>
-          <Text style={styles.label}>Rating</Text>
-          <Text style={[styles.rating, styles[`rating${restaurant.rating}`]]}>
-            {restaurant.rating}
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.label}>Cuisine Type</Text>
-          <Text style={styles.value}>{restaurant.cuisineType}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.label}>Location</Text>
-          <View style={styles.tagsContainer}>
-            {restaurant.location.map((tag, index) => (
-              <View key={index} style={[styles.tag, styles.locationTag]}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
+      {isEditing ? (
+        <ScrollView style={styles.container}>
+          <RestaurantForm
+            onSubmit={handleUpdate}
+            initialData={restaurant}
+          />
+        </ScrollView>
+      ) : (
+        <ScrollView style={styles.container}>
+          <View style={styles.section}>
+            <Text style={styles.label}>Rating</Text>
+            <Text style={[styles.rating, styles[`rating${restaurant.rating}`]]}>
+              {restaurant.rating}
+            </Text>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Vibe</Text>
-          <View style={styles.tagsContainer}>
-            {restaurant.vibeTags.map((tag, index) => (
-              <View key={index} style={[styles.tag, styles.vibeTag]}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
+          <View style={styles.section}>
+            <Text style={styles.label}>Cuisine Type</Text>
+            <Text style={styles.value}>{restaurant.cuisineType}</Text>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Order</Text>
-          <Text style={styles.value}>{restaurant.order}</Text>
-        </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>Location</Text>
+            <View style={styles.tagsContainer}>
+              {restaurant.location.map((tag, index) => (
+                <View key={index} style={[styles.tag, styles.locationTag]}>
+                  <Text style={styles.tagText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Description</Text>
-          <Text style={styles.value}>{restaurant.description}</Text>
-        </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>Vibe</Text>
+            <View style={styles.tagsContainer}>
+              {restaurant.vibeTags.map((tag, index) => (
+                <View key={index} style={[styles.tag, styles.vibeTag]}>
+                  <Text style={styles.tagText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Visited Date</Text>
-          <Text style={styles.value}>
-            {new Date(restaurant.visitedDate).toLocaleDateString()}
-          </Text>
-        </View>
-      </ScrollView>
+          <View style={styles.section}>
+            <Text style={styles.label}>Order</Text>
+            <Text style={styles.value}>{restaurant.order}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>Description</Text>
+            <Text style={styles.value}>{restaurant.description}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>Visited Date</Text>
+            <Text style={styles.value}>
+              {new Date(restaurant.visitedDate).toLocaleDateString()}
+            </Text>
+          </View>
+        </ScrollView>
+      )}
     </>
   );
 }
@@ -169,5 +203,12 @@ const styles = StyleSheet.create({
   tagText: {
     color: '#666',
     fontSize: 14,
+  },
+  editButton: {
+    marginRight: 16,
+  },
+  editButtonText: {
+    color: '#007AFF',
+    fontSize: 16,
   },
 }); 

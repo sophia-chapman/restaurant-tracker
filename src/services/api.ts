@@ -13,7 +13,8 @@ const handleResponse = async (response: Response) => {
   if (Array.isArray(data)) {
     return data.map(restaurant => ({
       ...restaurant,
-      id: restaurant._id
+      id: restaurant._id,
+      _id: undefined
     }));
   }
   
@@ -21,7 +22,8 @@ const handleResponse = async (response: Response) => {
   if (data._id) {
     return {
       ...data,
-      id: data._id
+      id: data._id,
+      _id: undefined
     };
   }
   

@@ -86,6 +86,7 @@ export const useRestaurants = () => {
       setRestaurants((prev) =>
         prev.map((r) => (r.id === id ? updatedRestaurant : r))
       );
+      return updatedRestaurant;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
