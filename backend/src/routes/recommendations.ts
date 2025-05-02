@@ -3,11 +3,24 @@ import { Recommendation } from '../models/Recommendation';
 
 const router = express.Router();
 
+// Migration route to update existing recommendations
+router.post('/migrate', async (req, res) => {
+  try {
+    const result = await Recommendation.updateMany(
+      { deleted: { $exists: false } },
+      { $set: { deleted: false } }
+    );
+    res.json({ message: `Updated ${result.modifiedCount} recommendations` });
+  } catch (error) {
+    res.status(500).json({ message: 'Error migrating recommendations' });
+  }
+});
+
 // Search recommendations
 router.get('/search', async (req, res) => {
   try {
     const { name, location, cuisineType, recommendedBy } = req.query;
-    const query: any = {};
+    const query: any = { deleted: false };
 
     if (name) query.name = { $regex: name, $options: 'i' };
     if (location) query.location = { $regex: location, $options: 'i' };
@@ -24,7 +37,7 @@ router.get('/search', async (req, res) => {
 // Get all recommendations
 router.get('/', async (req, res) => {
   try {
-    const recommendations = await Recommendation.find();
+    const recommendations = await Recommendation.find({ deleted: false });
     res.json(recommendations);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching recommendations' });
@@ -34,7 +47,7 @@ router.get('/', async (req, res) => {
 // Get a single recommendation
 router.get('/:id', async (req, res) => {
   try {
-    const recommendation = await Recommendation.findById(req.params.id);
+    const recommendation = await Recommendation.findOne({ _id: req.params.id, deleted: false });
     if (!recommendation) {
       res.status(404).json({ error: 'Recommendation not found' });
       return;
@@ -59,8 +72,8 @@ router.post('/', async (req, res) => {
 // Update a recommendation
 router.put('/:id', async (req, res) => {
   try {
-    const recommendation = await Recommendation.findByIdAndUpdate(
-      req.params.id,
+    const recommendation = await Recommendation.findOneAndUpdate(
+      { _id: req.params.id, deleted: false },
       req.body,
       { new: true }
     );
@@ -73,10 +86,14 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a recommendation
+// Soft delete a recommendation
 router.delete('/:id', async (req, res) => {
   try {
-    const recommendation = await Recommendation.findByIdAndDelete(req.params.id);
+    const recommendation = await Recommendation.findOneAndUpdate(
+      { _id: req.params.id, deleted: false },
+      { deleted: true },
+      { new: true }
+    );
     if (!recommendation) {
       return res.status(404).json({ message: 'Recommendation not found' });
     }

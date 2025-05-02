@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity, FlatList } from 'react-native';
 import RestaurantList from '../../src/components/RestaurantList';
 import RecommendationList from '../../src/components/RecommendationList';
 import { useRestaurants } from '../../src/hooks/useRestaurants';
 import { useRecommendations } from '../../src/hooks/useRecommendations';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Restaurant } from '../../src/types/restaurant';
 
 type SortOption = 'all' | 'reviewed' | 'recommended';
@@ -16,8 +16,23 @@ interface CombinedItem {
 
 export default function HomeScreen() {
   const [sortOption, setSortOption] = useState<SortOption>('all');
-  const { restaurants, loading: restaurantsLoading, error: restaurantsError } = useRestaurants();
-  const { recommendations, loading: recommendationsLoading, error: recommendationsError } = useRecommendations();
+  const { restaurants, loading: restaurantsLoading, error: restaurantsError, refresh: refreshRestaurants } = useRestaurants();
+  const { recommendations, loading: recommendationsLoading, error: recommendationsError, refresh: refreshRecommendations } = useRecommendations();
+
+  // Create a single memoized refresh function
+  const refreshAll = useCallback(async () => {
+    await Promise.all([
+      refreshRestaurants(),
+      refreshRecommendations()
+    ]);
+  }, [refreshRestaurants, refreshRecommendations]);
+
+  // Refresh data when the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshAll();
+    }, [refreshAll])
+  );
 
   const handleRestaurantPress = (restaurant: Restaurant) => {
     router.push(`/restaurant/${restaurant.id}`);

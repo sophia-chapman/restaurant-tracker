@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Restaurant, RestaurantFilters } from '../types/restaurant';
 import { addRestaurant as addRestaurantAPI, getRestaurants, searchRestaurants } from '../services/api';
 
@@ -9,11 +9,7 @@ export const useRestaurants = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchRestaurants();
-  }, []);
-
-  const fetchRestaurants = async () => {
+  const fetchRestaurants = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getRestaurants();
@@ -25,9 +21,9 @@ export const useRestaurants = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const addRestaurant = async (restaurant: Omit<Restaurant, 'id'>) => {
+  const addRestaurant = useCallback(async (restaurant: Omit<Restaurant, 'id'>) => {
     try {
       const newRestaurant = await addRestaurantAPI(restaurant);
       setRestaurants(prev => [...prev, newRestaurant]);
@@ -37,9 +33,9 @@ export const useRestaurants = () => {
       console.error('Error adding restaurant:', err);
       throw err;
     }
-  };
+  }, []);
 
-  const search = async (filters: RestaurantFilters) => {
+  const search = useCallback(async (filters: RestaurantFilters) => {
     try {
       setLoading(true);
       const query = {
@@ -68,9 +64,9 @@ export const useRestaurants = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const updateRestaurant = async (id: string, restaurant: Partial<Restaurant>) => {
+  const updateRestaurant = useCallback(async (id: string, restaurant: Partial<Restaurant>) => {
     try {
       const response = await fetch(`${API_URL}/restaurants/${id}`, {
         method: 'PUT',
@@ -91,9 +87,9 @@ export const useRestaurants = () => {
       setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     }
-  };
+  }, []);
 
-  const deleteRestaurant = async (id: string) => {
+  const deleteRestaurant = useCallback(async (id: string) => {
     try {
       const response = await fetch(`${API_URL}/restaurants/${id}`, {
         method: 'DELETE',
@@ -106,7 +102,11 @@ export const useRestaurants = () => {
       setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRestaurants();
+  }, [fetchRestaurants]);
 
   return {
     restaurants,

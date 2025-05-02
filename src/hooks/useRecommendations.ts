@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Recommendation {
   id: string;
@@ -15,7 +15,7 @@ export function useRecommendations() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:3000/api/recommendations');
@@ -34,15 +34,14 @@ export function useRecommendations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const search = async (filters: { name?: string; location?: string; cuisineType?: string }) => {
+  const search = useCallback(async (filters: { name?: string; location?: string; cuisineType?: string }) => {
     try {
       setLoading(true);
-      // If no filters are provided, clear the recommendations
+      // If no filters are provided, fetch all recommendations
       if (!filters.name && !filters.location && !filters.cuisineType) {
-        setRecommendations([]);
-        setError(null);
+        await fetchRecommendations();
         return;
       }
 
@@ -67,11 +66,11 @@ export function useRecommendations() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchRecommendations]);
 
   useEffect(() => {
     fetchRecommendations();
-  }, []);
+  }, [fetchRecommendations]);
 
   return {
     recommendations,

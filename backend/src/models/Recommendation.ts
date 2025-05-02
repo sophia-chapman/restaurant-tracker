@@ -21,6 +21,10 @@ const recommendationSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  deleted: {
+    type: Boolean,
+    default: false,
+  },
 }, {
   timestamps: true,
 });

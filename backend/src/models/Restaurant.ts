@@ -7,16 +7,16 @@ const restaurantSchema = new mongoose.Schema({
   },
   location: {
     type: [String],
-    required: true,
+    required: false,
   },
   vibeTags: {
     type: [String],
-    required: true,
+    required: false,
     default: [],
   },
   cuisineType: {
     type: String,
-    required: true,
+    required: false,
   },
   rating: {
     type: String,
@@ -25,11 +25,11 @@ const restaurantSchema = new mongoose.Schema({
   },
   order: {
     type: String,
-    required: true,
+    required: false,
   },
   description: {
     type: String,
-    required: true,
+    required: false,
   },
   visitedDate: {
     type: Date,

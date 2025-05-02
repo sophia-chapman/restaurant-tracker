@@ -27,6 +27,21 @@ export default function RecommendationDetailScreen() {
     router.push(`/restaurant/recommendation/${id}/edit`);
   };
 
+  const handleReview = () => {
+    if (!recommendation) return;
+    
+    // Navigate to add restaurant form with pre-filled data
+    router.push({
+      pathname: '/restaurant/add',
+      params: {
+        name: recommendation.name,
+        location: recommendation.location.join(','),
+        cuisineType: recommendation.cuisineType,
+        recommendationId: recommendation.id,
+      }
+    });
+  };
+
   // Only show loading indicator if we don't have any recommendations yet
   if (loading && recommendations.length === 0) {
     return (
@@ -92,6 +107,10 @@ export default function RecommendationDetailScreen() {
             {new Date(recommendation.createdAt).toLocaleDateString()}
           </Text>
         </View>
+
+        <TouchableOpacity style={styles.reviewButton} onPress={handleReview}>
+          <Text style={styles.reviewButtonText}>Review this restaurant</Text>
+        </TouchableOpacity>
       </ScrollView>
     </>
   );
@@ -100,8 +119,7 @@ export default function RecommendationDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 16,
+    backgroundColor: '#fff',
   },
   center: {
     flex: 1,
@@ -113,29 +131,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   section: {
-    marginBottom: 24,
-    backgroundColor: 'white',
     padding: 16,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   label: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    marginBottom: 4,
   },
   value: {
     fontSize: 16,
-    color: '#333',
+    color: '#000',
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -155,6 +162,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   editButton: {
-    marginRight: 16,
+    padding: 8,
+  },
+  reviewButton: {
+    backgroundColor: '#007AFF',
+    margin: 16,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  reviewButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 }); 
