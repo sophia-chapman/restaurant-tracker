@@ -87,7 +87,7 @@ export default function RestaurantDetailScreen() {
         }}
       />
       {isEditing ? (
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
           <RestaurantForm
             onSubmit={handleUpdate}
             initialData={restaurant}
@@ -167,6 +167,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   center: {
     flex: 1,

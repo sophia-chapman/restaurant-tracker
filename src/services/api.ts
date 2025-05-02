@@ -1,6 +1,7 @@
 import { Restaurant, RestaurantFilters } from '../types/restaurant';
+import env from '../config/env';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = env.apiUrl;
 
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
@@ -32,7 +33,7 @@ const handleResponse = async (response: Response) => {
 
 export const getRestaurants = async (): Promise<Restaurant[]> => {
   try {
-    const response = await fetch(`${API_URL}/restaurants`);
+    const response = await fetch(`${API_URL}/api/restaurants`);
     return handleResponse(response);
   } catch (error) {
     console.error('Error in getRestaurants:', error);
@@ -48,7 +49,7 @@ export const searchRestaurants = async (filters: RestaurantFilters): Promise<Res
     if (filters.cuisineType) queryParams.append('cuisineType', filters.cuisineType);
     if (filters.rating) queryParams.append('rating', filters.rating);
 
-    const response = await fetch(`${API_URL}/restaurants/search?${queryParams}`);
+    const response = await fetch(`${API_URL}/api/restaurants/search?${queryParams}`);
     return handleResponse(response);
   } catch (error) {
     console.error('Error in searchRestaurants:', error);
@@ -58,7 +59,7 @@ export const searchRestaurants = async (filters: RestaurantFilters): Promise<Res
 
 export const addRestaurant = async (restaurant: Omit<Restaurant, 'id'>): Promise<Restaurant> => {
   try {
-    const response = await fetch(`${API_URL}/restaurants`, {
+    const response = await fetch(`${API_URL}/api/restaurants`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ export const addRestaurant = async (restaurant: Omit<Restaurant, 'id'>): Promise
 
 export const updateRestaurant = async (id: string, restaurant: Partial<Restaurant>): Promise<Restaurant> => {
   try {
-    const response = await fetch(`${API_URL}/restaurants/${id}`, {
+    const response = await fetch(`${API_URL}/api/restaurants/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ export const updateRestaurant = async (id: string, restaurant: Partial<Restauran
 
 export const deleteRestaurant = async (id: string): Promise<void> => {
   try {
-    const response = await fetch(`${API_URL}/restaurants/${id}`, {
+    const response = await fetch(`${API_URL}/api/restaurants/${id}`, {
       method: 'DELETE',
     });
     if (!response.ok) {

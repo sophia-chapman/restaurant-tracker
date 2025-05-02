@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import env from '../config/env';
 
 interface Recommendation {
   id: string;
@@ -18,7 +19,7 @@ export function useRecommendations() {
   const fetchRecommendations = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/recommendations');
+      const response = await fetch(`${env.apiUrl}/api/recommendations`);
       if (!response.ok) {
         throw new Error('Failed to fetch recommendations');
       }
@@ -50,7 +51,7 @@ export function useRecommendations() {
       if (filters.location) queryParams.append('location', filters.location);
       if (filters.cuisineType) queryParams.append('cuisineType', filters.cuisineType);
 
-      const response = await fetch(`http://localhost:3000/api/recommendations/search?${queryParams}`);
+      const response = await fetch(`${env.apiUrl}/api/recommendations/search?${queryParams}`);
       if (!response.ok) {
         throw new Error('Failed to search recommendations');
       }
@@ -70,7 +71,7 @@ export function useRecommendations() {
 
   const deleteRecommendation = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/recommendations/${id}`, {
+      const response = await fetch(`${env.apiUrl}/api/recommendations/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

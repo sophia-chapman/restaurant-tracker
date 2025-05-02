@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, FlatList, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { API_BASE_URL } from '../config';
 
 interface TagSelectorProps {
   selectedTags: string[];
@@ -29,7 +30,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`http://localhost:3000/api/${apiEndpoint}`);
+      const response = await fetch(`${API_BASE_URL}/api/${apiEndpoint}`);
       if (!response.ok) {
         throw new Error('Failed to load tags');
       }
@@ -60,7 +61,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
     if (newTag && !selectedTags.includes(newTag)) {
       try {
         setError(null);
-        const response = await fetch(`http://localhost:3000/api/${apiEndpoint}`, {
+        const response = await fetch(`${API_BASE_URL}/api/${apiEndpoint}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

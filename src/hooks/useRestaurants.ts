@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Restaurant, RestaurantFilters } from '../types/restaurant';
 import { addRestaurant as addRestaurantAPI, getRestaurants, searchRestaurants } from '../services/api';
-
-const API_URL = 'http://localhost:3000/api';
+import { API_BASE_URL } from '../config';
 
 export const useRestaurants = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -68,7 +67,7 @@ export const useRestaurants = () => {
 
   const updateRestaurant = useCallback(async (id: string, restaurant: Partial<Restaurant>) => {
     try {
-      const response = await fetch(`${API_URL}/restaurants/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/restaurants/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +90,7 @@ export const useRestaurants = () => {
 
   const deleteRestaurant = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`${API_URL}/restaurants/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/restaurants/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

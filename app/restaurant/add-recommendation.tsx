@@ -2,11 +2,12 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { RecommendationForm } from '../../src/components/RecommendationForm';
 import { router } from 'expo-router';
+import env from '../../src/config/env';
 
 export default function AddRecommendationScreen() {
   const handleSubmit = async (recommendation: any) => {
     try {
-      const response = await fetch('http://localhost:3000/api/recommendations', {
+      const response = await fetch(`${env.apiUrl}/api/recommendations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

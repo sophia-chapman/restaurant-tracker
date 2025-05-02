@@ -12,10 +12,16 @@ import { Recommendation } from './models/Recommendation';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
-// CORS configuration - allow all origins during development
-app.use(cors());
+// Get CORS origins from environment variables
+const CORS_ORIGINS = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:8081'];
+
+// CORS configuration
+app.use(cors({
+  origin: CORS_ORIGINS,
+  credentials: true
+}));
 
 // Middleware
 app.use(express.json());
@@ -56,7 +62,7 @@ mongoose.connect(MONGODB_URI, {
   app.use('/api/recommendations', recommendationsRouter);
   
   // Start server
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
   });
 })

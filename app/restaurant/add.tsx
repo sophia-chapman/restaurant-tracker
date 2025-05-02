@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { RestaurantForm } from '../../src/components/RestaurantForm';
 import { useRestaurants } from '../../src/hooks/useRestaurants';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Restaurant } from '../../src/types/restaurant';
+import { API_BASE_URL } from '../../src/config';
 
 export default function AddRestaurantScreen() {
   const { addRestaurant, refresh } = useRestaurants();
@@ -29,7 +30,7 @@ export default function AddRestaurantScreen() {
       // If this was converted from a recommendation, soft delete it
       if (params.recommendationId) {
         try {
-          const response = await fetch(`http://localhost:3000/api/recommendations/${params.recommendationId}`, {
+          const response = await fetch(`${API_BASE_URL}/api/recommendations/${params.recommendationId}`, {
             method: 'DELETE',
           });
           if (!response.ok) {
@@ -60,9 +61,9 @@ export default function AddRestaurantScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <RestaurantForm onSubmit={handleSubmit} initialData={initialData} />
-    </View>
+    </ScrollView>
   );
 }
 

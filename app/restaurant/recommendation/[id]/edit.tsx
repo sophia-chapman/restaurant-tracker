@@ -3,6 +3,7 @@ import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { RecommendationForm } from '../../../../src/components/RecommendationForm';
 import { useRecommendations } from '../../../../src/hooks/useRecommendations';
+import env from '../../../../src/config/env';
 
 export default function EditRecommendationScreen() {
   const { id } = useLocalSearchParams();
@@ -18,7 +19,7 @@ export default function EditRecommendationScreen() {
 
   const handleSubmit = async (updatedData: any) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/recommendations/${id}`, {
+      const response = await fetch(`${env.apiUrl}/api/recommendations/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
